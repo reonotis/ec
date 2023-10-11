@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('owners', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->comment('ユーザー名');
+            $table->string('name')->comment('オーナー名');
             $table->string('email')->comment('メールアドレス');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->comment('パスワード');
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'))->comment('作成日時');
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'))->comment('更新日時');
             $table->softDeletes()->comment('論理削除日時');
-            $table->comment('ユーザー（利用者）ログイン用');
+            $table->comment('オーナーログイン用');
         });
     }
 
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('owners');
     }
 };

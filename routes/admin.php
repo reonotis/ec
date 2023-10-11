@@ -1,46 +1,52 @@
 <?php
 
-use App\Http\Controllers\User\ProfileController;
-use App\Http\Controllers\User\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\User\Auth\ConfirmablePasswordController;
-use App\Http\Controllers\User\Auth\EmailVerificationNotificationController;
-use App\Http\Controllers\User\Auth\EmailVerificationPromptController;
-use App\Http\Controllers\User\Auth\NewPasswordController;
-use App\Http\Controllers\User\Auth\PasswordController;
-use App\Http\Controllers\User\Auth\PasswordResetLinkController;
-use App\Http\Controllers\User\Auth\RegisteredUserController;
-use App\Http\Controllers\User\Auth\VerifyEmailController;
-//use App\Http\Controllers\User\SolicitDonationsController;
-//use App\Http\Controllers\User\ShippingDestinationsController;
-//use App\Http\Controllers\User\UserTopController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Admin\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\Admin\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\Admin\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Admin\Auth\NewPasswordController;
+use App\Http\Controllers\Admin\Auth\PasswordController;
+use App\Http\Controllers\Admin\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Admin\Auth\RegisteredUserController;
+use App\Http\Controllers\Admin\Auth\VerifyEmailController;
+use App\Http\Controllers\Admin\OwnerController;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Users Routes
+| Admin Routes
 |--------------------------------------------------------------------------
-| このファイルにはUserとしてログインする為のルーティング、または
-| Userとしてログインしていなければ表示出来ないルーティングを記載しています
+| このファイルには管理者としてログインする為のルーティング、または
+| 管理者としてログインしていなければ表示出来ないルーティングを記載しています
 */
 
 // ログインする為のルーティング関連
-Route::prefix('user')->as('user.')->group(function () {
+Route::prefix('admin')->as('admin.')->middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
     Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login');
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store');
 });
 
-// ログイン必須のルーティング
-Route::prefix('user')->as('user.')->middleware('auth:users')->group(function () {
-    // トップページ
-    // Route::get('top', [UserTopController::class, 'index'])->name('top');
+Route::prefix('admin')->as('admin.')->middleware('auth:admin')->group(function () {
 
-    //
+    Route::get('/', function () {
+        return view('admin.home');
+    })->name('home');
+
+    // オーナ関連
+    Route::get('owner', [OwnerController::class, 'index'])->name('owner.index');
+    Route::get('owner-create', [OwnerController::class, 'create'])->name('owner.create');
+    Route::post('owner-store', [OwnerController::class, 'store'])->name('owner.store');
+    Route::post('owner-search', [OwnerController::class, 'search'])->name('owner.search');
+    Route::get('owner-show/{owner}', [OwnerController::class, 'show'])->name('owner.show');
+
+
     Route::get('verify-email', EmailVerificationPromptController::class)->name('verification.notice');
     Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
         ->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
